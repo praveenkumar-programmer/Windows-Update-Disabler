@@ -10,4 +10,4 @@ This Script can :
 
 # ScreenShot
 
-![screenshot](acreenshot.jpg)
+![screenshot](screenshot.JPG)
