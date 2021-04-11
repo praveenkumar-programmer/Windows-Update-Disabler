@@ -7,3 +7,7 @@ This Script can :
 2) Disable Windows Updates Once ( No automatic turn on prevention ).
 3) Enable Windows Updates and Let Windows update to turn on automatically.
 4) Enable Windows Updates Once ( Keep automatic turn on prevention ).
+
+# ScreenShot
+
+![screenshot](acreenshot.jpg)
