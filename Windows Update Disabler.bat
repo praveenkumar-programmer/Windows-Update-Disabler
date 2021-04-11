@@ -52,13 +52,11 @@ IF "%_input%" == "1"  (
 Rem create turnoffwindowsupdates.bat file
 echo sc config wuauserv start= disabled > C:\Scripts\turnoffwindowsupdates.bat
 echo net stop wuauserv >> C:\Scripts\turnoffwindowsupdates.bat
-echo sc config bits start= disabled >> C:\Scripts\turnoffwindowsupdates.bat
-echo net stop bits >> C:\Scripts\turnoffwindowsupdates.bat
-echo sc config dosvc start= disabled >> C:\Scripts\turnoffwindowsupdates.bat
-echo net stop dosvc >> C:\Scripts\turnoffwindowsupdates.bat
+echo sc config UsoSvc start= disabled >> C:\Scripts\turnoffwindowsupdates.bat
+echo net stop UsoSvc >> C:\Scripts\turnoffwindowsupdates.bat
 
 Rem Add scheduled task entry to run the turnoffwindowsupdates.bat script on every boot
-schtasks /create /tn TurnWindowsUpdateOff /sc ONSTART /DELAY 0000:30 /RL HIGHEST /tr C:\Scripts\turnoffwindowsupdates.lnk” /F
+schtasks /create /tn TurnWindowsUpdateOff  /F /sc ONSTART /DELAY 0000:30 /RL HIGHEST /tr C:\Scripts\turnoffwindowsupdates.lnk
 
 Rem Run the script to disable windows updates
 call C:\Scripts\turnoffwindowsupdates.bat
@@ -75,11 +73,8 @@ Rem Run the script to disable windows updates
 sc config wuauserv start= disabled
 net stop wuauserv
 
-sc config bits start= disabled
-net stop bits
-
-sc config dosvc start= disabled
-net stop dosvc
+sc config UsoSvc start= disabled
+net stop UsoSvc
 
 echo.
 echo "Windows updates disabled."
@@ -97,11 +92,8 @@ Rem Run the script to enable windows updates
 sc config wuauserv start= auto
 net start wuauserv
 
-sc config bits start= auto
-net start bits
-
-sc config dosvc start= auto
-net start dosvc
+sc config UsoSvc start= auto
+net start UsoSvc
 
 echo.
 echo "Windows updates enabled and automatic turn on prevention script is removed."
@@ -117,11 +109,8 @@ Rem Run the script to enable windows updates
 sc config wuauserv start= auto
 net start wuauserv
 
-sc config bits start= auto
-net start bits
-
-sc config dosvc start= auto
-net start dosvc
+sc config UsoSvc start= auto
+net start UsoSvc
 
 echo.
 echo "Windows updates enabled."
