@@ -1,4 +1,5 @@
 @echo off
+setlocal EnableDelayedExpansion
 
 :: BatchGotAdmin
 :-------------------------------------
@@ -56,7 +57,31 @@ echo sc config UsoSvc start= disabled >> C:\Scripts\turnoffwindowsupdates.bat
 echo net stop UsoSvc >> C:\Scripts\turnoffwindowsupdates.bat
 
 Rem Add scheduled task entry to run the turnoffwindowsupdates.bat script on every boot
+
 schtasks /create /tn TurnWindowsUpdateOff  /F /sc ONSTART /DELAY 0000:30 /RL HIGHEST /tr C:\Scripts\turnoffwindowsupdates.bat
+
+schtasks /query /xml /TN TurnWindowsUpdateOff > task.xml
+
+copy task.xml tasktemp.xml
+
+(for /F "delims=" %%a in (tasktemp.xml) do (
+
+   set "line=%%a"
+   set "newLine=!line:Command>=!"
+   if "!newLine!" neq "!line!" (
+		set "newLine=<Command>C:\Scripts\turnoffwindowsupdates.bat</Command>"
+		set "anotherLine=<WorkingDirectory>C:\Scripts\</WorkingDirectory>"
+		echo !anotherLine!
+   )
+   echo !newLine!
+)) > task.xml
+
+schtasks.exe /Create /XML task.xml /tn TurnWindowsUpdateOff /F
+
+del /F task.xml
+del /F tasktemp.xml
+
+
 
 Rem Run the script to disable windows updates
 call C:\Scripts\turnoffwindowsupdates.bat
