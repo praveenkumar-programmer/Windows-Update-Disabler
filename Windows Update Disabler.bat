@@ -11,6 +11,7 @@ REM  --> Check for permissions
 )
 
 REM --> If error flag set, we do not have admin.
+
 if '%errorlevel%' NEQ '0' (
     echo Requesting administrative privileges...
     goto UACPrompt
@@ -24,6 +25,11 @@ if '%errorlevel%' NEQ '0' (
     "%temp%\getadmin.vbs"
     del "%temp%\getadmin.vbs"
     exit /B
+	
+if '%errorlevel%' NEQ '0' (
+    echo Requesting administrative privileges...
+    goto UACPrompt
+) else ( goto gotAdmin )
 
 :gotAdmin
     pushd "%CD%"
@@ -51,14 +57,17 @@ SET /P _input= "Press option number : "
 IF "%_input%" == "1"  (
 
 Rem create turnoffwindowsupdates.bat file
-echo sc config wuauserv start= disabled > C:\Scripts\turnoffwindowsupdates.bat
+echo "___________________  Disabling Windows Update___________________________" > C:\Scripts\turnoffwindowsupdates.bat
+echo. >> C:\Scripts\turnoffwindowsupdates.bat
+echo. >> C:\Scripts\turnoffwindowsupdates.bat
+echo sc config wuauserv start= disabled >> C:\Scripts\turnoffwindowsupdates.bat
 echo net stop wuauserv >> C:\Scripts\turnoffwindowsupdates.bat
 echo sc config UsoSvc start= disabled >> C:\Scripts\turnoffwindowsupdates.bat
 echo net stop UsoSvc >> C:\Scripts\turnoffwindowsupdates.bat
 
 Rem Add scheduled task entry to run the turnoffwindowsupdates.bat script on every boot
 
-schtasks /create /tn TurnWindowsUpdateOff  /F /sc ONSTART /DELAY 0000:30 /RL HIGHEST /tr C:\Scripts\turnoffwindowsupdates.bat
+schtasks /create /tn TurnWindowsUpdateOff  /F /sc ONLOGON /DELAY 0001:30 /RL HIGHEST /tr C:\Scripts\turnoffwindowsupdates.bat
 
 schtasks /query /xml /TN TurnWindowsUpdateOff > task.xml
 
@@ -67,13 +76,26 @@ copy task.xml tasktemp.xml
 (for /F "delims=" %%a in (tasktemp.xml) do (
 
    set "line=%%a"
-   set "newLine=!line:Command>=!"
-   if "!newLine!" neq "!line!" (
-		set "newLine=<Command>C:\Scripts\turnoffwindowsupdates.bat</Command>"
+   set "command=!line:Command>=!"
+   set "disallowbattery=!line:DisallowStartIfOnBatteries>=!"
+   set "stoponbattery=!line:StopIfGoingOnBatteries>=!"
+   set "startwhenavailable=<StartWhenAvailable>true</StartWhenAvailable>"
+   if "!command!" neq "!line!" (
+		set "command=<Command>C:\Scripts\turnoffwindowsupdates.bat</Command>"
 		set "anotherLine=<WorkingDirectory>C:\Scripts\</WorkingDirectory>"
+		echo !command!
 		echo !anotherLine!
+   ) else if "!disallowbattery!" neq "!line!" (
+		set "disallowbattery=<DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>"
+		echo !disallowbattery!
+   ) else if "!stoponbattery!" neq "!line!" (
+		set "stoponbattery=<StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>"
+		echo !stoponbattery!
+		echo !startwhenavailable!
+   ) else (
+		echo !command!
    )
-   echo !newLine!
+   
 )) > task.xml
 
 schtasks.exe /Create /XML task.xml /tn TurnWindowsUpdateOff /F
